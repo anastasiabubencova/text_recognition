@@ -103,20 +103,24 @@ def plot_image(pixels: np.array):
     plt.show()
 
 
-def nn():
+def nn(filename, num_words, num_letters):
 
     input_nodes, hidden_nodes, out_nodes, learn_speed = init_net()
     w_in2hidden, w_hidden2out = create_net(input_nodes, hidden_nodes, out_nodes)
-    My_Variant = 5
 
-    for i in range(5):
+    for i in range(2):
         print('epoch', i+1)
         _, _, test_list = train_set(w_in2hidden, w_hidden2out, learn_speed)
         test_set(w_in2hidden, w_hidden2out, test_list)
 
-    data_file = open("predict.csv", 'r')
+    data_file = open(filename + ".csv", 'r')
     predict_list = data_file.readlines()[1:]
     data_file.close()
+
+    for i in range(len(predict_list)):
+        predict_list[i] = [int(j) for j in predict_list[i].split(',') if j != '\n']
+
+
 
     names = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
     names_dict = {}
@@ -126,10 +130,19 @@ def nn():
     text = ''
 
     for pred in predict_list:
-        all_values = pred.split(',')
-        inputs = (np.asfarray(all_values) / 255.0 * 0.999) + 0.001
+        inputs = (np.asfarray(pred) / 255.0 * 0.999) + 0.001
         out_session = net_output(w_in2hidden, w_hidden2out, inputs, 0)
 
         text += str(list(names_dict.keys())[np.argmax(out_session)])
 
-    print(text)
+    words = [text[:num_letters[0]]]
+    for i in range(1,len(num_letters)):
+        s = sum(num_letters[:i])
+        words.append(text[s:s+num_letters[i]])
+
+    strings = [words[:num_words[0]]]
+    for i in range(1,len(num_words)):
+        s = sum(num_words[:i])
+        strings.append(words[s:s+num_words[i]])
+
+    print('\n'.join(' '.join(word) for word in strings))
