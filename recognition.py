@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-names = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+names = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя123'
 names_dict = {}
 for i in range(len(names)):
     names_dict[names[i]] = i
@@ -118,8 +118,8 @@ def to_png(letters):
 def to_csv(letters, type_of_dataset):
     letters_to_csv = []
     for letter in letters:
-        if (type_of_dataset == 'train') :#& (letters.index(letter) not in errors):
-            letters_to_csv.append([names_dict[names[len(letters_to_csv)]]])
+        if (type_of_dataset == 'train') & (letters.index(letter) not in errors):
+            letters_to_csv.append([names_dict[names[len(letters_to_csv)-1]]])
         else:
             letters_to_csv.append([])
         for pixel in letter[2]:
@@ -143,11 +143,45 @@ def to_csv(letters, type_of_dataset):
 
     return text
 
-def create_dataset(image_file):
-    letters, spaces = letters_extract(image_file, out_size=28)
-    to_png(letters)
-    letters = error_letters(letters)
-    to_csv(letters, 'train')
+def create_datasets():
+    path = "alphabets\\"
+    files = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
+    for file in files:
+        file = path + file + '.png'
+        img = cv2.imread(file)
+        letters = letters_extract(img, out_size=28)
+        letters = error_letters(letters)
+        #to_png(letters)
+
+    path = 'letters\\'
+    files = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
+    for n in files:
+        n = path + n + '\\'
+        names = range(32)
+        data = []
+        for i in names:
+            img = cv2.imread(n + str(i) + '.png')  # , cv2.IMREAD_GRAYSCALE)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            g = [i]
+            for j in img:
+                g += list(j)
+            data.append(g)
+
+        labels = ['label']
+        for i in range(1, 29):
+            for j in range(1, 29):
+                labels.append(str(i) + 'x' + str(j))
+
+        import pandas as pd
+
+        pd.DataFrame(data=data, columns=labels).to_csv(n + 'ds.csv', index=False)
+
+    df = []
+    names = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
+    for i in names:
+        i = path + i + '\\'
+        df.append(pd.read_csv(i + 'ds.csv'))
+    pd.concat(df).to_csv('all.csv', index=False)
 
 def text_to_csv(img, filename):
     letters = letters_extract(img, out_size=28)

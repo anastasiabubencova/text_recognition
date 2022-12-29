@@ -1,4 +1,4 @@
-from recognition import create_dataset, text_to_csv, find_all_words
+from recognition import create_datasets, text_to_csv, find_all_words
 from nn import nn_parallel, nn_no_parallel
 import cv2
 import threading
@@ -72,7 +72,10 @@ def main_no_parallel():
 
     nn_no_parallel(filename, num_words, num_letters)
 
+
+
 if __name__ == '__main__' :
+    #create_datasets()
     start_with_parallel = time.time()
     main_with_parallel()
     end_with_parallel = time.time()
@@ -81,3 +84,4 @@ if __name__ == '__main__' :
     print('time results')
     print('no parallel ' + str(end_with_parallel-start_with_parallel) + ' seconds')
     print('with parallel ' + str(end_no_parallel - end_with_parallel) + ' seconds')
+

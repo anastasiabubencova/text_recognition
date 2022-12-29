@@ -94,7 +94,7 @@ def nn_parallel(filename, num_words, num_letters):
     input_nodes, hidden_nodes, out_nodes, learn_speed = init_net()
     w_in2hidden, w_hidden2out = create_net(input_nodes, hidden_nodes, out_nodes)
 
-    for i in range(2):
+    for i in range(5):
         print('epoch', i+1)
         _, _, test_list = train_set(w_in2hidden, w_hidden2out, learn_speed)
         test_set(w_in2hidden, w_hidden2out, test_list)
@@ -152,7 +152,7 @@ def nn_no_parallel(filename, num_words, num_letters):
     input_nodes, hidden_nodes, out_nodes, learn_speed = init_net()
     w_in2hidden, w_hidden2out = create_net(input_nodes, hidden_nodes, out_nodes)
 
-    for i in range(2):
+    for i in range(5):
         print('epoch', i+1)
         _, _, test_list = train_set(w_in2hidden, w_hidden2out, learn_speed)
         test_set(w_in2hidden, w_hidden2out, test_list)
