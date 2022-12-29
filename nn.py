@@ -1,6 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.special import expit as f_act
+import threading
 
 def init_net():
     input_nodes = 784
@@ -20,10 +20,6 @@ def create_net(input_nodes, hidden_nodes, out_nodes):
 def net_output(w_in2hidden, w_hidden2out, input_signal, return_hidden):
     inputs = np.array(input_signal, ndmin=2).T
     if inputs.size == 783 :
-        '''print('inputs')
-        print(inputs.size)
-        print('w_in2hidden')
-        print(w_in2hidden.size)'''
         inputs = np.append(inputs, np.array(1.))
 
     hidden_in = np.dot(w_in2hidden, inputs)
@@ -64,11 +60,9 @@ def train_set(w_in2hidden, w_hidden2out, learn_speed):
 
     for record in training_list:
         all_values = record.split(',')
-        # range of input data is scaled from [0.0,255] to [0.001,1.0]
         inputs = (np.asfarray(all_values[1:]) / 255.0 * 0.999) + 0.001
 
         targets = np.zeros(33) + 0.001
-        # digits 0-9
         targets[int(all_values[0])] = 1.0
         net_train(targets, inputs, w_in2hidden, w_hidden2out, learn_speed)
 
@@ -77,14 +71,10 @@ def train_set(w_in2hidden, w_hidden2out, learn_speed):
 
 # 7
 def test_set(w_in2hidden, w_hidden2out, test_list):
-    '''    data_file = open("predict.csv", 'r')
-    test_list = data_file.readlines()[1:]
-    data_file.close()'''
     test = []
 
     for record in test_list:
         all_values = record.split(',')
-        # range of input data is scaled from [0.0,255] to [0.001,1.0]
         inputs = (np.asfarray(all_values[1:]) / 255.0 * 0.999) + 0.001
         out_session = net_output(w_in2hidden, w_hidden2out, inputs, 0)
 
@@ -97,10 +87,6 @@ def test_set(w_in2hidden, w_hidden2out, test_list):
     print('Net efficiency % =', (test.sum() / test.size) * 100)
 
 #8
-def plot_image(pixels: np.array):
-    print(len(pixels))
-    plt.imshow(pixels.reshape((28, 28)), cmap='gray')
-    plt.show()
 
 
 def nn(filename, num_words, num_letters):
@@ -128,12 +114,26 @@ def nn(filename, num_words, num_letters):
         names_dict[names[i]] = i
 
     text = ''
-
-    for pred in predict_list:
+    results_text = {}
+    def parallel_prediction(i, pred, results_text):
         inputs = (np.asfarray(pred) / 255.0 * 0.999) + 0.001
         out_session = net_output(w_in2hidden, w_hidden2out, inputs, 0)
 
-        text += str(list(names_dict.keys())[np.argmax(out_session)])
+        results_text[i] = str(list(names_dict.keys())[np.argmax(out_session)])
+
+    threads = [threading.Thread(target=parallel_prediction(i, predict_list[i], results_text)) for i in range(len(predict_list))]
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    text = ''
+    for t in list(results_text.values()):
+        text += t
+
+
 
     words = [text[:num_letters[0]]]
     for i in range(1,len(num_letters)):

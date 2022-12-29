@@ -149,16 +149,6 @@ def create_dataset(image_file):
     letters = error_letters(letters)
     to_csv(letters, 'train')
 
-'''def find_letters(img):
-    letters = find_text_areas(img, 1)
-    for i in range(len(letters)):
-        #gray = cv2.cvtColor(letters[i], cv2.COLOR_BGR2GRAY)
-        #_, letters[i] = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)
-        #letters[i] = cv2.resize(letters[i], (28, 28), interpolation=cv2.INTER_AREA)
-        #cv2.imshow('o', letters[i])
-    #cv2.waitKey(0)
-    return letters'''
-
 def text_to_csv(img, filename):
     letters = letters_extract(img, out_size=28)
     return to_csv(letters, filename), len(letters)
