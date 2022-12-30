@@ -8,17 +8,11 @@ for i in range(len(names)):
 errors = [7, 8, 13, 32]
 
 def find_text_areas(image, iter) :
-    # Load image, grayscale, Gaussian blur, adaptive threshold
-
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (9,9), 0)
     thresh = cv2.adaptiveThreshold(blur,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,11,30)
-
-    # Dilate to combine adjacent text contours
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9,9))
     dilate = cv2.dilate(thresh, kernel, iterations=iter)
-
-    # Find contours, highlight text areas, and extract ROIs
     cnts = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
 
@@ -28,10 +22,6 @@ def find_text_areas(image, iter) :
             x,y,w,h = cv2.boundingRect(c)
             cv2.rectangle(image, (x, y), (x + w, y + h), (36,255,12), 3)
             text_areas[x] = image[y:y+h, x:x+w]
-            #cv2.imshow('p', image[y:y + h, x:x + w])
-            #cv2.waitKey(0)
-
-
         text_areas = sorted(text_areas.items())
         just_images = []
         for area in text_areas:
@@ -43,10 +33,6 @@ def find_text_areas(image, iter) :
             x, y, w, h = cv2.boundingRect(c)
             cv2.rectangle(image, (x, y), (x + w, y + h), (36, 255, 12), 3)
             text_areas.append(image[y:y + h, x:x + w])
-
-            #cv2.imshow('p', image[y:y + h, x:x + w])
-            #cv2.waitKey(0)
-
         return text_areas[::-1]
 
 def find_all_words(image):
@@ -118,7 +104,7 @@ def to_png(letters):
 def to_csv(letters, type_of_dataset):
     letters_to_csv = []
     for letter in letters:
-        if (type_of_dataset == 'train') & (letters.index(letter) not in errors):
+        if (type_of_dataset == 'train') :#& (letters.index(letter) not in errors):
             letters_to_csv.append([names_dict[names[len(letters_to_csv)-1]]])
         else:
             letters_to_csv.append([])
@@ -143,61 +129,13 @@ def to_csv(letters, type_of_dataset):
 
     return text
 
-def create_datasets():
-    path = "alphabets\\"
-    files = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
-    for file in files:
-        file = path + file + '.png'
-        img = cv2.imread(file)
-        letters = letters_extract(img, out_size=28)
-        letters = error_letters(letters)
-        #to_png(letters)
 
-    path = 'letters\\'
-    files = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
-    for n in files:
-        n = path + n + '\\'
-        names = range(32)
-        data = []
-        for i in names:
-            img = cv2.imread(n + str(i) + '.png')  # , cv2.IMREAD_GRAYSCALE)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            g = [i]
-            for j in img:
-                g += list(j)
-            data.append(g)
-
-        labels = ['label']
-        for i in range(1, 29):
-            for j in range(1, 29):
-                labels.append(str(i) + 'x' + str(j))
-
-        import pandas as pd
-
-        pd.DataFrame(data=data, columns=labels).to_csv(n + 'ds.csv', index=False)
-
-    df = []
-    names = ['arial', 'colibri', 'consolas', 'courer_new', 'georgia', 'lucida', 'tahoma', 'times', 'verdana']
-    for i in names:
-        i = path + i + '\\'
-        df.append(pd.read_csv(i + 'ds.csv'))
-    pd.concat(df).to_csv('all.csv', index=False)
 
 def text_to_csv(img, filename):
     letters = letters_extract(img, out_size=28)
     return to_csv(letters, filename), len(letters)
 
-def error_letters(letters):
-    e_l = [6, 12, 31]
-    for i in e_l:
-        img = cv2.imread('error_letters\\' + str(i) + '.png')
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
-        '''iimmgg = []
-        for c in img:
-            iimmgg += list(c)
-        print(iimmgg)'''
-    return letters
+
 
 def tuple_to_list(let) :
     letters = []

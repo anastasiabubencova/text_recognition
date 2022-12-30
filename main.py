@@ -1,16 +1,14 @@
-from recognition import create_datasets, text_to_csv, find_all_words
+from recognition import text_to_csv, find_all_words
+from dataset_creation import create_datasets
 from nn import nn_parallel, nn_no_parallel
 import cv2
 import threading
 import time
 
-filename = 'samples\\disciplin.png'
+filename = 'samples\\cn.png'
 
 
 def main_with_parallel():
-    #create_dataset("alphabet.png")
-
-
     image = cv2.imread(filename)
 
     all_words, num_strings, num_words = find_all_words(image)
@@ -47,8 +45,6 @@ def main_with_parallel():
     nn_parallel(filename, num_words, num_letters)
 
 def main_no_parallel():
-    # create_dataset("alphabet.png")
-
     image = cv2.imread(filename)
 
     all_words, num_strings, num_words = find_all_words(image)
